@@ -7,7 +7,8 @@
 <style>
   :root{
     --primary:#0284c7; --primary-dark:#0369a1;
-    --success:#16a34a; --danger:#dc2626;
+    --success:#16a34a; --success-weak:#eaf7ef;
+    --danger:#dc2626;  --warning:#f59e0b;
     --bg:#f1f5f9; --ink:#0f172a; --muted:#64748b;
     --radius:16px;
   }
@@ -38,22 +39,28 @@
   .footer{margin-top:18px;text-align:center;color:#64748b;font-size:13px}
   .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;z-index:9999}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  /* Promo banner after submit */
+  .promo{display:none;margin:14px 0 12px;background:linear-gradient(90deg,#0ea5e9,#22c55e);color:#fff;
+         padding:12px 14px;border-radius:12px;font-weight:800;box-shadow:0 10px 22px rgba(2,132,199,.22)}
+  .promo .small{display:block;font-weight:600;opacity:.9;font-size:13px;margin-top:4px}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <!-- Header with logo (ارفع logo.jpg في الجذر) -->
   <div class="brand">
-    <!-- ارفع logo.jpg في الجذر -->
     <img src="logo.jpg" alt="Shams Pharmacy" onerror="this.style.display='none'">
     <div class="title">خدمة وصفتي – صيدليات شمس</div>
   </div>
   <p class="muted">اختَر طريقة استلام وصفتك ثم أدخل البيانات المطلوبة.</p>
 
+  <!-- اختيار الطريقة -->
   <div class="seg" id="modeSeg">
     <button data-mode="pickup" class="active">🚶‍♂️ استلام من الفرع</button>
     <button data-mode="delivery">🏠 توصيل للمنزل</button>
   </div>
 
+  <!-- النموذج -->
   <div id="formView">
     <label>رقم الهوية</label>
     <input id="id_number" type="text" placeholder="1012345678">
@@ -81,7 +88,14 @@
     <div id="errorMsg" class="error"></div>
   </div>
 
+  <!-- التأكيد + الشريط الترويجي -->
   <div id="doneView" style="display:none">
+    <!-- شريط الإشعار الملوّن (جملة سطر واحد) -->
+    <div id="promoBanner" class="promo">
+      اصرف وصفتك من صيدليات شمس واكسب نقاط ولاء تتحول خصم على مشترياتك 💙
+      <span class="small">لا تنسَ تفعيل رقمك عند الصرف لتجميع النقاط.</span>
+    </div>
+
     <h2 style="color:var(--success)">✅ تم تجهيز الطلب</h2>
     <p>تم فتح واتساب لإرسال الرسالة.</p>
     <a id="waLink" class="btn btn-primary" style="display:block;margin-bottom:12px" target="_blank">🔗 تواصل عبر واتساب</a>
@@ -93,14 +107,13 @@
   </div>
 </div>
 
+<!-- Toast -->
 <div id="toast" class="toast">تم فتح واتساب لإرسال طلبك ✅</div>
 
 <script>
 (function(){
   const WHATSAPP = "966592627644"; // بدون +
-  const EMO_PICKUP = "🚶‍♂️";
-  const EMO_DELIVERY = "🏠";
-  const EMO_PIN = "📍";
+  const EMO_PICKUP = "🚶‍♂️", EMO_DELIVERY = "🏠", EMO_PIN = "📍";
 
   const modeSeg=document.getElementById("modeSeg");
   const deliveryBlock=document.getElementById("deliveryBlock");
@@ -115,11 +128,13 @@
   const doneView=document.getElementById("doneView");
   const waLink=document.getElementById("waLink");
   const toast=document.getElementById("toast");
+  const promo=document.getElementById("promoBanner");
   const sendBtn=document.getElementById("sendBtn");
 
   let mode="pickup";
   let gpsLink="";
 
+  // تبديل الوضع
   modeSeg.addEventListener("click",(e)=>{
     const b=e.target.closest("button[data-mode]");
     if(!b) return;
@@ -129,19 +144,21 @@
     deliveryBlock.style.display=(mode==="delivery")?"block":"none";
   });
 
+  // Toast
   function showToast(msg){
     toast.textContent=msg||"تم تنفيذ العملية";
     toast.classList.add("show");
     setTimeout(()=>toast.classList.remove("show"), 2200);
   }
 
+  // تحديد الموقع
   document.getElementById("locBtn").onclick=()=>{
     locStatus.textContent="⏳ جارِ تحديد الموقع...";
     if(!navigator.geolocation){ locStatus.textContent="⚠ المتصفح لا يدعم تحديد الموقع"; return; }
     navigator.geolocation.getCurrentPosition(pos=>{
       gpsLink=`https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
       locStatus.textContent="✅ تم التقاط موقعك";
-    },err=>{
+    },()=>{
       locStatus.textContent="⚠ تعذر تحديد الموقع";
     },{enableHighAccuracy:true,timeout:12000,maximumAge:0});
   };
@@ -159,6 +176,7 @@
     return m;
   }
 
+  // إرسال الطلب
   sendBtn.addEventListener("click", ()=>{
     errorMsg.textContent="";
     sendBtn.classList.add("sending");
@@ -173,15 +191,20 @@
     const msg=buildMessage();
     const waURL="https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(msg);
 
-    window.location.href=waURL;             // فتح واتساب مباشرة
-    formView.style.display="none";          // عرض تأكيد عند الرجوع
+    // فتح واتساب مباشرة
+    window.location.href=waURL;
+
+    // شاشة التأكيد + الشريط الترويجي
+    formView.style.display="none";
     doneView.style.display="block";
     waLink.href=waURL;
-
+    promo.style.display="block";               // <-- إظهار الشريط الترويجي
     showToast("تم فتح واتساب لإرسال طلبك ✅");
+
     setTimeout(()=>sendBtn.classList.remove("sending"), 900);
   });
 
+  // طلب جديد
   document.getElementById("newReq").onclick=()=>location.reload();
 })();
 </script>
