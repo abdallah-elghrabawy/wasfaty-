@@ -1,167 +1,170 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>خدمة وصفتي – صيدليات شمس</title>
 <style>
-  body{ font-family:Tahoma,Arial,sans-serif; background:#f7fafc; margin:0; }
-  .wrap{ max-width:720px; margin:24px auto; background:#fff; border-radius:14px; padding:20px; box-shadow:0 5px 20px rgba(0,0,0,0.08); }
-  h1{ margin:0 0 10px; font-size:24px; }
-  .seg{ display:flex; gap:10px; margin-bottom:12px; }
-  .seg button{ flex:1; padding:12px; border-radius:10px; border:1px solid #ddd; background:#f8fafc; font-weight:700; cursor:pointer; }
-  .seg button.active{ background:#0ea5e9; color:#fff; border-color:#0ea5e9; }
-  .card{ padding:16px; border:1px solid #ddd; border-radius:10px; }
-  label{ display:block; font-weight:600; margin-bottom:6px; }
-  input,textarea{ width:100%; padding:10px; border:1px solid #ccc; border-radius:8px; }
-  textarea{ min-height:70px; }
-  .actions{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
-  .btn{ border:none; padding:12px 16px; border-radius:10px; cursor:pointer; font-weight:700; }
-  .primary{ background:#16a34a; color:#fff; }
-  .sec{ background:#0ea5e9; color:#fff; }
-  .danger{ background:#ef4444; color:#fff; }
-  .hidden{ display:none; }
-  .status{ margin-top:8px; }
-  .success{ color:#16a34a; }
-  .error{ color:#ef4444; }
-  .footer{ text-align:center; margin-top:20px; color:#666; font-size:12px; }
+  body{font-family:Tahoma,Arial,sans-serif;margin:0;background:#f7fafc;}
+  .wrap{max-width:720px;margin:16px auto;background:#fff;padding:20px;border-radius:16px;box-shadow:0 5px 20px rgba(0,0,0,0.08);}
+  h1{margin:0 0 6px;font-size:22px;}
+  .seg{display:flex;gap:8px;margin:10px 0;}
+  .seg button{flex:1;padding:12px;border-radius:10px;border:1px solid #ccc;background:#f0f9ff;font-weight:700;cursor:pointer;}
+  .seg button.active{background:#0284c7;color:#fff;border-color:#0284c7;}
+  label{display:block;margin-top:12px;font-weight:600;}
+  input,textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;}
+  textarea{min-height:70px;}
+  .actions{margin-top:18px;}
+  .btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer;}
+  .btn-primary{background:#0ea5e9;color:#fff;}
+  .error{color:#b91c1c;font-size:14px;margin-top:6px;}
+  #doneView{text-align:center;}
+  .footer{text-align:center;margin-top:20px;color:#666;font-size:13px;}
 </style>
 </head>
 
 <body>
 <div class="wrap">
-
 <h1>خدمة وصفتي – صيدليات شمس</h1>
-<p>كيف تحب تستلم وصفتك؟</p>
+<p>اختَر طريقة استلام وصفتك</p>
 
 <div class="seg" id="modeSeg">
   <button data-mode="pickup" class="active">🚶‍♂️ استلام من الفرع</button>
-  <button data-mode="delivery">🏠 توصيل إلى المنزل</button>
+  <button data-mode="delivery">🏠 توصيل للمنزل</button>
 </div>
 
-<div class="card" id="formView">
+<div id="formView">
 
 <label>رقم الهوية (مطلوب)</label>
-<input id="id_number" type="text" placeholder="1012345678" />
+<input id="id_number" type="text" placeholder="1012345678">
 
-<label style="margin-top:10px;">رقم الوصفة (قد يبدأ بحرف)</label>
-<input id="rx_number" type="text" placeholder="A123456789" />
+<label>رقم الوصفة (قد يبدأ بحرف)</label>
+<input id="rx_number" type="text" placeholder="A123456789">
 
-<div id="deliveryBlock" class="hidden" style="margin-top:14px;">
+<div id="deliveryBlock" style="display:none;">
   <label>رقم الجوال للتوصيل</label>
-  <input id="mobile" type="tel" placeholder="05xxxxxxxx" />
+  <input id="mobile" type="tel" placeholder="05xxxxxxxx">
 
-  <div class="actions">
-    <button class="sec" type="button" id="locBtn">📍 تحديد موقعي</button>
-    <button class="danger" type="button" id="clearLoc">مسح</button>
-  </div>
+  <label>📍 تحديد موقعي (اختياري)</label>
+  <button id="locBtn" style="margin-top:6px;padding:10px;background:#10b981;color:#fff;border:none;border-radius:8px;cursor:pointer;">
+    تحديد موقعي الآن
+  </button>
+  <div id="locStatus" style="font-size:13px;margin-top:6px;"></div>
 
-  <label style="margin-top:10px;">وصف العنوان</label>
+  <label>وصف العنوان (اختياري)</label>
   <textarea id="addr" placeholder="اسم الحي + أقرب معلم"></textarea>
 
-  <label style="margin-top:10px;">رابط موقع خرائط جوجل (اختياري)</label>
-  <input id="maps_link" type="text" placeholder="https://maps.app.goo.gl/..." />
+  <label>رابط موقع خرائط جوجل (اختياري)</label>
+  <input id="maps_link" type="text" placeholder="https://maps.app.goo.gl/...">
 </div>
 
-<div id="locStatus" class="status"></div>
-
 <div style="margin-top:10px;">
- <input id="consent" type="checkbox"> أوافق على مشاركة بياناتي لغرض تجهيز/توصيل الأدوية
+<input id="consent" type="checkbox"> أوافق على مشاركة بياناتي لغرض تجهيز الطلب
 </div>
 
 <div class="actions">
-  <button class="btn primary" id="sendBtn">إرسال الطلب الآن</button>
+<button class="btn btn-primary" id="sendBtn">إرسال الطلب الآن</button>
 </div>
 
+<div id="errorMsg" class="error"></div>
+
 </div>
 
-<div class="card hidden" id="doneView">
-  <h2 class="success">✅ تم إرسال الطلب</h2>
-  <p id="summary"></p>
-  <a id="waLink" class="btn sec" target="_blank">📩 تواصل مع الصيدلية</a>
-  <button id="newReq" class="btn primary">طلب جديد</button>
+<div id="doneView" style="display:none;">
+<h2>✅ تم تجهيز الطلب</h2>
+<p>تم فتح الواتساب لإرسال الرسالة</p>
+<p style="font-size:13px;color:#555;">في حال عدم الفتح تلقائيًا يمكنك التواصل مباشرة عبر الزر بالأسفل</p>
+<a id="waLink" class="btn btn-primary" style="display:block;margin-bottom:8px;" target="_blank">🔗 تواصل عبر واتساب</a>
+<button id="newReq" class="btn" style="background:#ddd;">طلب جديد</button>
 </div>
 
-<div class="footer">صيدلية شمس – حي الدار البيضاء – شارع ابن حجر</div>
-
+<div class="footer">
+صيدلية شمس – حي الدار البيضاء – شارع ابن حجر<br>
+واتساب: 0592627644
+</div>
 </div>
 
 <script>
 (function(){
   const WHATSAPP = "966592627644";
-  const formView = document.getElementById("formView");
-  const doneView = document.getElementById("doneView");
   const modeSeg = document.getElementById("modeSeg");
-  const deliveryBlock = document.getElementById("deliveryBlock");
-  const idEl = document.getElementById("id_number");
-  const rxEl = document.getElementById("rx_number");
-  const mobileEl = document.getElementById("mobile");
-  const addrEl = document.getElementById("addr");
-  const mapsEl = document.getElementById("maps_link");
-  const consentEl = document.getElementById("consent");
-  const locStatus = document.getElementById("locStatus");
-  const waLink = document.getElementById("waLink");
+  const deliveryBlock=document.getElementById("deliveryBlock");
+  const idEl=document.getElementById("id_number");
+  const rxEl=document.getElementById("rx_number");
+  const mobileEl=document.getElementById("mobile");
+  const addrEl=document.getElementById("addr");
+  const mapsEl=document.getElementById("maps_link");
+  const consentEl=document.getElementById("consent");
+  const errorMsg=document.getElementById("errorMsg");
+  const locStatus=document.getElementById("locStatus");
+  const waLink=document.getElementById("waLink");
+  const formView=document.getElementById("formView");
+  const doneView=document.getElementById("doneView");
+  let mode="pickup";
+  let gpsLink="";
 
-  let mode = "pickup";
-  let gpsLink = "";
-
-  modeSeg.addEventListener("click", (e)=>{
-    const b = e.target.closest("button[data-mode]");
+  modeSeg.addEventListener("click",(e)=>{
+    const b=e.target.closest("button[data-mode]");
     if(!b) return;
-    mode = b.dataset.mode;
-    [...modeSeg.children].forEach(btn=>btn.classList.remove("active"));
+    mode=b.dataset.mode;
+    [...modeSeg.children].forEach(x=>x.classList.remove("active"));
     b.classList.add("active");
-    deliveryBlock.classList.toggle("hidden", mode!=="delivery");
+    deliveryBlock.style.display=(mode==="delivery")?"block":"none";
   });
 
-  document.getElementById("locBtn").onclick = () =>{
+  document.getElementById("locBtn").onclick=()=>{
     if(!navigator.geolocation){
-      locStatus.innerHTML = "المتصفح لا يدعم تحديد الموقع.";
+      locStatus.innerHTML="⚠ المتصفح لا يدعم تحديد الموقع";
       return;
     }
+    locStatus.innerHTML="⏳ جاري تحديد الموقع...";
     navigator.geolocation.getCurrentPosition(pos=>{
-      gpsLink = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-      locStatus.innerHTML = "✔ تم التقاط موقعك";
-    },()=>{
-      locStatus.innerHTML = "⚠ تعذر تحديد الموقع";
+      gpsLink=`https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
+      locStatus.innerHTML="✅ تم التقاط موقعك";
+    },err=>{
+      locStatus.innerHTML="⚠ تعذر تحديد الموقع";
     });
   };
 
-  document.getElementById("clearLoc").onclick = ()=>{
-    gpsLink=""; locStatus.innerHTML="";
-  };
-
   function buildMessage(){
-    let msg = "";
-    msg += (mode==="pickup"? "🔔 استلام من الفرع":"🚚 توصيل للبيت")+"\n";
-    msg += "رقم الهوية: "+idEl.value+"\n";
-    msg += "رقم الوصفة: "+rxEl.value+"\n";
+    let m="";
+    m+=(mode==="pickup"? "🔔 استلام من الفرع":"🚚 توصيل للمنزل")+"\n";
+    m+="رقم الهوية: "+idEl.value+"\n";
+    m+="رقم الوصفة: "+rxEl.value+"\n";
     if(mode==="delivery"){
-      if(mobileEl.value) msg += "الجوال: "+mobileEl.value+"\n";
-      if(addrEl.value) msg += "العنوان: "+addrEl.value+"\n";
-      if(gpsLink) msg += "الموقع: "+gpsLink+"\n";
-      else if(mapsEl.value) msg += "الموقع: "+mapsEl.value+"\n";
+      if(mobileEl.value) m+="الجوال: "+mobileEl.value+"\n";
+      if(addrEl.value) m+="العنوان: "+addrEl.value+"\n";
+      if(gpsLink) m+="📍 الموقع: "+gpsLink+"\n";
+      else if(mapsEl.value) m+="📍 الموقع: "+mapsEl.value+"\n";
     }
-    msg += "*تمت الموافقة على مشاركة البيانات*";
-    return msg;
+    m+="\n*العميل وافق على مشاركة البيانات*";
+    return m;
   }
 
-  document.getElementById("sendBtn").onclick = ()=>{
-    if(!idEl.value || !rxEl.value) return alert("من فضلك أدخل رقم الهوية والوصفة");
-    if(!consentEl.checked) return alert("الرجاء الموافقة للمواصلة");
-    if(mode==="delivery" && !mobileEl.value) return alert("الجوال مطلوب للتوصيل");
+  document.getElementById("sendBtn").onclick=()=>{
+    errorMsg.innerHTML="";
+    if(!idEl.value || !rxEl.value)
+      return errorMsg.innerHTML="⚠ أدخل رقم الهوية والوصفة";
+    if(mode==="delivery" && !mobileEl.value)
+      return errorMsg.innerHTML="⚠ أدخل الجوال للتوصيل";
+    if(!consentEl.checked)
+      return errorMsg.innerHTML="⚠ برجاء الموافقة لإرسال الطلب";
 
-    const msg = buildMessage();
-    waLink.href = "https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(msg);
-    formView.classList.add("hidden");
-    doneView.classList.remove("hidden");
-    document.getElementById("summary").innerHTML = msg.replace(/\n/g,"<br>");
+    const msg=buildMessage();
+    const waURL="https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(msg);
+
+    // ✅ فتح الواتساب فورًا
+    window.location.href=waURL;
+
+    // إظهار شاشة التأكيد لمن يعود للصفحة
+    formView.style.display="none";
+    doneView.style.display="block";
+    waLink.href=waURL;
   };
 
-  document.getElementById("newReq").onclick = ()=>{
-    location.reload();
-  };
+  document.getElementById("newReq").onclick=()=>location.reload();
 })();
 </script>
+
 </body>
 </html>
