@@ -41,30 +41,36 @@
   #doneView{text-align:center}
   .footer{margin-top:18px;text-align:center;color:#64748b;font-size:13px}
 
+  .promo{margin:14px 0 12px;background:linear-gradient(90deg,#0ea5e9,#22c55e);color:#fff;
+         padding:12px 14px;border-radius:12px;font-weight:800;box-shadow:0 10px 22px rgba(2,132,199,.22);animation:fadeIn .6s ease}
+  .promo .small{display:block;font-weight:600;opacity:.9;font-size:13px;margin-top:4px}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+
   .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;z-index:9999}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-  .promo{display:none;margin:14px 0 12px;background:linear-gradient(90deg,#0ea5e9,#22c55e);color:#fff;
-         padding:12px 14px;border-radius:12px;font-weight:800;box-shadow:0 10px 22px rgba(2,132,199,.22)}
-  .promo .small{display:block;font-weight:600;opacity:.9;font-size:13px;margin-top:4px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <!-- لوجو (ارفع logo.jpg في الجذر) -->
+  <!-- لوجو -->
   <div class="brand">
     <img src="logo.jpg" alt="Shams Pharmacy" onerror="this.style.display='none'">
     <div class="title">خدمة وصفتي – صيدليات شمس</div>
   </div>
+
+  <!-- ✅ شريط الدعاية من أول الصفحة -->
+  <div class="promo" id="promoTop">
+    اصرف وصفتك من صيدليات شمس واكسب نقاط ولاء تتحول خصم على مشترياتك 💙
+    <span class="small">لا تنسَ تفعيل رقمك عند الصرف لتجميع النقاط.</span>
+  </div>
+
   <p class="muted">اختَر طريقة استلام وصفتك ثم أدخل البيانات المطلوبة.</p>
 
-  <!-- اختيار الطريقة -->
   <div class="seg" id="modeSeg">
     <button data-mode="pickup" class="active">🚶‍♂️ استلام من الفرع</button>
     <button data-mode="delivery">🏠 توصيل للمنزل</button>
   </div>
 
-  <!-- النموذج -->
   <div id="formView">
     <label>رقم الهوية</label>
     <input id="id_number" type="text" placeholder="1012345678">
@@ -92,9 +98,8 @@
     <div id="errorMsg" class="error"></div>
   </div>
 
-  <!-- التأكيد + الشريط الترويجي -->
-  <div id="doneView" style="display:none">
-    <div id="promoBanner" class="promo">
+  <div id="doneView" style="display:none;text-align:center;">
+    <div id="promoBanner" class="promo" style="display:block;">
       اصرف وصفتك من صيدليات شمس واكسب نقاط ولاء تتحول خصم على مشترياتك 💙
       <span class="small">لا تنسَ تفعيل رقمك عند الصرف لتجميع النقاط.</span>
     </div>
@@ -110,14 +115,12 @@
   </div>
 </div>
 
-<!-- Toast -->
 <div id="toast" class="toast">تم فتح واتساب لإرسال طلبك ✅</div>
 
 <script>
 (function(){
-  const WHATSAPP = "966592627644"; // بدون +
-  const EMO_PICKUP = "🚶‍♂️", EMO_DELIVERY = "🏠", EMO_PIN = "📍";
-
+  const WHATSAPP = "966592627644";
+  const EMO_PICKUP="🚶‍♂️", EMO_DELIVERY="🏠", EMO_PIN="📍";
   const modeSeg=document.getElementById("modeSeg");
   const deliveryBlock=document.getElementById("deliveryBlock");
   const idEl=document.getElementById("id_number");
@@ -134,50 +137,43 @@
   const promo=document.getElementById("promoBanner");
   const sendBtn=document.getElementById("sendBtn");
 
-  let mode="pickup";
-  let gpsLink="";
+  let mode="pickup", gpsLink="";
 
-  // --------- استعادة الحالة من localStorage عند فتح الصفحة ----------
-  const SAVED = localStorage.getItem("shams_wasfaty_state");
-  if (SAVED) {
-    try {
-      const st = JSON.parse(SAVED);
-      if (st && st.done) {
-        // ثبّت صفحة التأكيد
-        formView.style.display = "none";
-        doneView.style.display = "block";
-        promo.style.display = "block";
-        waLink.href = st.waURL || "#";
-        // ما نمسحش الحالة إلا لما المستخدم يضغط "طلب جديد"
+  // استرجاع الحالة عند فتح الصفحة
+  const SAVED=localStorage.getItem("shams_wasfaty_state");
+  if(SAVED){
+    try{
+      const st=JSON.parse(SAVED);
+      if(st&&st.done){
+        formView.style.display="none";
+        doneView.style.display="block";
+        promo.style.display="block";
+        waLink.href=st.waURL||"#";
       }
-    } catch(e){}
+    }catch(e){}
   }
-  // -------------------------------------------------------------------
 
-  // تبديل الوضع
   modeSeg.addEventListener("click",(e)=>{
     const b=e.target.closest("button[data-mode]");
-    if(!b) return;
+    if(!b)return;
     mode=b.dataset.mode;
     [...modeSeg.children].forEach(x=>x.classList.remove("active"));
     b.classList.add("active");
     deliveryBlock.style.display=(mode==="delivery")?"block":"none";
   });
 
-  // تحديد الموقع
   document.getElementById("locBtn").onclick=()=>{
     locStatus.textContent="⏳ جارِ تحديد الموقع...";
-    if(!navigator.geolocation){ locStatus.textContent="⚠ المتصفح لا يدعم تحديد الموقع"; return; }
+    if(!navigator.geolocation){locStatus.textContent="⚠ المتصفح لا يدعم تحديد الموقع";return;}
     navigator.geolocation.getCurrentPosition(pos=>{
       gpsLink=`https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
       locStatus.textContent="✅ تم التقاط موقعك";
-    },()=>{
-      locStatus.textContent="⚠ تعذر تحديد الموقع";
-    },{enableHighAccuracy:true,timeout:12000,maximumAge:0});
+    },()=>{locStatus.textContent="⚠ تعذر تحديد الموقع";},
+    {enableHighAccuracy:true,timeout:12000,maximumAge:0});
   };
 
   function buildMessage(){
-    let m=(mode==="pickup"? `${EMO_PICKUP} استلام من الفرع` : `${EMO_DELIVERY} توصيل للمنزل`)+"\n";
+    let m=(mode==="pickup"?`${EMO_PICKUP} استلام من الفرع`:`${EMO_DELIVERY} توصيل للمنزل`)+"\n";
     m+=`رقم الهوية: ${idEl.value}\n`;
     m+=`رقم الوصفة: ${rxEl.value}\n`;
     if(mode==="delivery"){
@@ -189,49 +185,33 @@
     return m;
   }
 
-  // إرسال الطلب
-  sendBtn.addEventListener("click", ()=>{
+  sendBtn.onclick=()=>{
     errorMsg.textContent="";
     sendBtn.classList.add("sending");
-
-    if(!idEl.value || !rxEl.value){ errorMsg.textContent="⚠ أدخل رقم الهوية والوصفة"; return sendBtn.classList.remove("sending"); }
-    if(!consentEl.checked){ errorMsg.textContent="⚠ برجاء الموافقة لإرسال الطلب"; return sendBtn.classList.remove("sending"); }
+    if(!idEl.value||!rxEl.value){errorMsg.textContent="⚠ أدخل رقم الهوية والوصفة";return sendBtn.classList.remove("sending");}
+    if(!consentEl.checked){errorMsg.textContent="⚠ برجاء الموافقة لإرسال الطلب";return sendBtn.classList.remove("sending");}
     if(mode==="delivery"){
-      if(!mobileEl.value){ errorMsg.textContent="⚠ أدخل رقم الجوال"; return sendBtn.classList.remove("sending"); }
-      if(!gpsLink){ errorMsg.textContent="⚠ يجب تحديد الموقع للتوصيل"; return sendBtn.classList.remove("sending"); }
+      if(!mobileEl.value){errorMsg.textContent="⚠ أدخل رقم الجوال";return sendBtn.classList.remove("sending");}
+      if(!gpsLink){errorMsg.textContent="⚠ يجب تحديد الموقع للتوصيل";return sendBtn.classList.remove("sending");}
     }
-
     const msg=buildMessage();
     const waURL="https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(msg);
-
-    // --------- حفظ الحالة قبل فتح واتساب (علشان تثبيت صفحة التأكيد عند الرجوع) ----------
-    localStorage.setItem("shams_wasfaty_state", JSON.stringify({
-      done:true, waURL: waURL, ts: Date.now()
-    }));
-    // --------------------------------------------------------------------------------------
-
-    // فتح واتساب مباشرة
-    window.location.href = waURL;
-
-    // لو رجع المتصفح، نظهر التأكيد + الشريط الترويجي
+    localStorage.setItem("shams_wasfaty_state",JSON.stringify({done:true,waURL:waURL,ts:Date.now()}));
+    window.location.href=waURL;
     formView.style.display="none";
     doneView.style.display="block";
     promo.style.display="block";
     waLink.href=waURL;
-
-    // توست بسيط
     showToast("تم فتح واتساب لإرسال طلبك ✅");
-    setTimeout(()=>sendBtn.classList.remove("sending"), 900);
-  });
+    setTimeout(()=>sendBtn.classList.remove("sending"),900);
+  };
 
-  // توست
   function showToast(msg){
     toast.textContent=msg||"تم تنفيذ العملية";
     toast.classList.add("show");
-    setTimeout(()=>toast.classList.remove("show"), 2200);
+    setTimeout(()=>toast.classList.remove("show"),2200);
   }
 
-  // طلب جديد: امسح الحالة وارجع للنموذج
   document.getElementById("newReq").onclick=()=>{
     localStorage.removeItem("shams_wasfaty_state");
     location.reload();
